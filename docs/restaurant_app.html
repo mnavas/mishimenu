@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>La Esquina Cuencana — App Demo</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f2f2f0; color: #111; min-height: 100vh; }
+:root {
+  --brand: #1D9E75; --brand-light: #E1F5EE; --brand-dark: #0F6E56;
+  --danger: #E24B4A; --danger-light: #FCEBEB;
+  --warning: #EF9F27; --warning-light: #FAEEDA;
+  --radius: 12px; --radius-sm: 8px;
+  --border: #e0e0de; --surface: #fff; --muted: #666; --bg: #f2f2f0;
+}
+.wrap { max-width: 480px; margin: 0 auto; background: var(--surface); min-height: 100vh; position: relative; }
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 20; }
+.tab { flex: 1; padding: 13px 8px; font-size: 13px; font-weight: 500; text-align: center; cursor: pointer; border: none; background: none; color: var(--muted); border-bottom: 2px solid transparent; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+.tab i { font-size: 16px; }
+.screen { padding: 16px; padding-bottom: 80px; }
+.badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.b-ok { background:#E1F5EE; color:#0F6E56; }
+.b-warn { background:#FAEEDA; color:#854F0B; }
+.b-err { background:#FCEBEB; color:#A32D2D; }
+.b-info { background:#E6F1FB; color:#185FA5; }
+.b-gray { background:#f0efea; color:#666; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: #111; transition: all 0.15s; }
+.btn:hover { background: #f5f5f3; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--brand); color: #fff; border-color: var(--brand-dark); }
+.btn-primary:hover { background: var(--brand-dark); }
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.sec { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 20px 0 10px; }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.menu-item:last-child { border: none; }
+.emo { font-size: 26px; width: 40px; text-align: center; flex-shrink: 0; }
+.minfo { flex: 1; }
+.mname { font-size: 15px; font-weight: 500; }
+.mdesc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.mprice { font-size: 15px; font-weight: 500; color: var(--brand-dark); margin-right: 10px; flex-shrink: 0; }
+.qtyc { display: flex; align-items: center; gap: 7px; }
+.qbtn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 17px; display: flex; align-items: center; justify-content: center; color: var(--brand); font-weight: 600; line-height: 1; }
+.qbtn:hover { background: var(--brand-light); }
+.qnum { font-size: 15px; font-weight: 500; min-width: 18px; text-align: center; }
+.cart-bar { position: sticky; bottom: 0; background: var(--brand); color: #fff; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.cart-bar:hover { background: var(--brand-dark); }
+.orow { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.orow:last-child { border: none; }
+.tot { display: flex; justify-content: space-between; padding: 12px 0 0; font-size: 16px; font-weight: 500; }
+.dbox { background: var(--brand-light); border: 1.5px solid var(--brand); border-radius: var(--radius); padding: 18px; text-align: center; margin: 14px 0; }
+.qr-grid { display: grid; grid-template-columns: repeat(9,1fr); gap: 2.5px; width: 90px; margin: 10px auto; background: white; padding: 8px; border-radius: 4px; }
+.qr-cell { aspect-ratio: 1; border-radius: 1px; }
+.amtcopy { display: flex; align-items: center; justify-content: center; gap: 10px; background: white; border-radius: 8px; padding: 12px 16px; margin: 10px 0; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.amtcopy:hover { background: #f5f5f3; }
+.amt { font-size: 26px; font-weight: 500; color: var(--brand-dark); }
+.upzone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.upzone:hover, .upzone.has { border-color: var(--brand); background: var(--brand-light); }
+.stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+.stat { background: #f5f5f3; border-radius: var(--radius-sm); padding: 12px; }
+.slabel { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.sval { font-size: 22px; font-weight: 500; }
+.ocard { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; background: var(--surface); }
+.ocard.fraud { border-left: 3px solid var(--danger); }
+.ocard.verified { border-left: 3px solid var(--brand); }
+.ocard.pending { border-left: 3px solid #ccc; }
+.ocard.review { border-left: 3px solid var(--warning); }
+.och { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+.oitems { font-size: 13px; color: var(--muted); margin: 5px 0; }
+.ofoot { display: flex; justify-content: space-between; align-items: center; }
+.oacts { display: flex; gap: 8px; margin-top: 10px; }
+.ndot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); margin-left: 3px; vertical-align: middle; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; z-index: 999; pointer-events: none; animation: fup 2.2s forwards; }
+@keyframes fup { 0%{opacity:0;transform:translateX(-50%) translateY(8px)} 12%{opacity:1;transform:translateX(-50%) translateY(0)} 75%{opacity:1} 100%{opacity:0} }
+.fin { animation: fi 0.25s ease; }
+@keyframes fi { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.tl { display: flex; flex-direction: column; }
+.ts { display: flex; gap: 12px; align-items: flex-start; padding: 6px 0; }
+.tdot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.tline { width: 2px; background: var(--border); margin-left: 4.5px; height: 18px; }
+input[type=text] { width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 14px; background: var(--surface); color: #111; }
+input[type=text]:focus { outline: none; border-color: var(--brand); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef } = React;
+
+const MENU = [
+  {id:1,cat:"Platos fuertes",name:"Seco de pollo",desc:"Arroz, menestra y ensalada",price:5.50,e:"🍗"},
+  {id:2,cat:"Platos fuertes",name:"Churrasco",desc:"Carne a la plancha con papas fritas",price:7.50,e:"🥩"},
+  {id:3,cat:"Platos fuertes",name:"Pescado frito",desc:"Con patacones y ensalada",price:6.00,e:"🐟"},
+  {id:4,cat:"Sopas",name:"Caldo de bolas",desc:"Tradicional con verde relleno",price:3.50,e:"🍲"},
+  {id:5,cat:"Sopas",name:"Sopa de mariscos",desc:"Con arroz y limón",price:4.50,e:"🦐"},
+  {id:6,cat:"Bebidas",name:"Jugo de naranja",desc:"Natural, tamaño grande",price:1.25,e:"🍊"},
+  {id:7,cat:"Bebidas",name:"Agua con gas",desc:"Botella 500ml",price:0.75,e:"💧"},
+  {id:8,cat:"Bebidas",name:"Cola",desc:"Lata 350ml",price:0.80,e:"🥤"},
+];
+
+const ORDERS_INIT = [
+  {id:"#0042",table:"Mesa 3",items:[{n:"Seco de pollo",q:2},{n:"Jugo de naranja",q:2}],total:13.50,status:"fraud",receipt:true,time:"14:32",txId:"DEU-2024-91827",dupOf:"#0031"},
+  {id:"#0041",table:"Para llevar",items:[{n:"Churrasco",q:1},{n:"Cola",q:1}],total:8.30,status:"pending",receipt:false,time:"14:28"},
+  {id:"#0040",table:"Mesa 1",items:[{n:"Pescado frito",q:2},{n:"Caldo de bolas",q:1}],total:15.50,status:"verified",receipt:true,time:"14:15",txId:"DEU-2024-91801"},
+  {id:"#0039",table:"Mesa 5",items:[{n:"Churrasco",q:3}],total:22.50,status:"review",receipt:true,time:"14:05",txId:"DEU-2024-91798"},
+];
+
+function QR() {
+  const p = [1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1,0,0,1,0,1,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,0,1,1,1,1,1,1,1,0,1,0,1,1,0,1,0];
+  return (
+    <div style={{display:'grid',gridTemplateColumns:'repeat(9,1fr)',gap:2,width:88,margin:'10px auto',background:'white',padding:7,borderRadius:5}}>
+      {p.map((v,i)=><div key={i} style={{aspectRatio:'1',background:v?'#111':'transparent',borderRadius:1}}/>)}
+    </div>
+  );
+}
+
+function Toast({msg}) { return <div className="toast">{msg}</div>; }
+
+function MenuScreen({cart,setCart,onCheckout}) {
+  const cats = [...new Set(MENU.map(i=>i.cat))];
+  const getQ = id => (cart.find(c=>c.id===id)||{qty:0}).qty;
+  const upd = (item,d) => setCart(prev=>{
+    const ex = prev.find(c=>c.id===item.id);
+    if(!ex && d>0) return [...prev,{...item,qty:1}];
+    if(ex && ex.qty+d<=0) return prev.filter(c=>c.id!==item.id);
+    return prev.map(c=>c.id===item.id?{...c,qty:c.qty+d}:c);
+  });
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  return (
+    <div>
+      <div style={{textAlign:'center',padding:'20px 0 10px'}}>
+        <div style={{fontSize:32}}>🍽️</div>
+        <div style={{fontSize:20,fontWeight:600,marginTop:6}}>La Esquina Cuencana</div>
+        <div style={{fontSize:13,color:'var(--muted)'}}>Comida casera desde 1985 · Cuenca, Ecuador</div>
+      </div>
+      {cats.map(cat=>(
+        <div key={cat} className="card">
+          <div className="sec">{cat}</div>
+          {MENU.filter(i=>i.cat===cat).map(item=>(
+            <div key={item.id} className="menu-item">
+              <div className="emo">{item.e}</div>
+              <div className="minfo">
+                <div className="mname">{item.name}</div>
+                <div className="mdesc">{item.desc}</div>
+              </div>
+              <div className="mprice">${item.price.toFixed(2)}</div>
+              <div className="qtyc">
+                {getQ(item.id)>0&&<button className="qbtn" onClick={()=>upd(item,-1)}>−</button>}
+                {getQ(item.id)>0&&<div className="qnum">{getQ(item.id)}</div>}
+                <button className="qbtn" onClick={()=>upd(item,1)}>+</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+      {count>0&&(
+        <div className="cart-bar" onClick={onCheckout}>
+          <span>🛒 {count} {count===1?'producto':'productos'}</span>
+          <span style={{fontWeight:600,fontSize:16}}>Ver orden — ${total.toFixed(2)}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OrderScreen({cart,onPay,onBack}) {
+  const [type,setType] = useState('mesa');
+  const [table,setTable] = useState('');
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  return (
+    <div className="fin">
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+        <button className="btn btn-sm" onClick={onBack}><i className="ti ti-arrow-left"></i> Menú</button>
+        <div style={{fontSize:18,fontWeight:500}}>Tu orden</div>
+      </div>
+      <div className="card">
+        {cart.map(item=>(
+          <div key={item.id} className="orow">
+            <span>{item.e} {item.qty}× {item.name}</span>
+            <span>${(item.price*item.qty).toFixed(2)}</span>
+          </div>
+        ))}
+        <div className="tot"><span>Total a pagar</span><span style={{color:'var(--brand-dark)'}}>${total.toFixed(2)}</span></div>
+      </div>
+      <div className="card">
+        <div className="sec">¿Cómo recibes tu pedido?</div>
+        <div style={{display:'flex',gap:8,marginBottom:12}}>
+          {['mesa','llevar'].map(t=>(
+            <button key={t} className={`btn ${type===t?'btn-primary':''}`} style={{flex:1,justifyContent:'center'}} onClick={()=>setType(t)}>
+              {t==='mesa'?<><i className="ti ti-armchair"></i> En mesa</>:<><i className="ti ti-shopping-bag"></i> Para llevar</>}
+            </button>
+          ))}
+        </div>
+        {type==='mesa'&&<input type="text" placeholder="Número de mesa (ej: 3)" value={table} onChange={e=>setTable(e.target.value)}/>}
+      </div>
+      <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'14px',fontSize:15}} onClick={()=>onPay(type,table,total)}>
+        <i className="ti ti-qrcode"></i> Continuar al pago
+      </button>
+    </div>
+  );
+}
+
+function PaymentScreen({total,type,table}) {
+  const [copied,setCopied] = useState(false);
+  const [toast,setToast] = useState(false);
+  const [file,setFile] = useState(null);
+  const [submitted,setSubmitted] = useState(false);
+  const ref = useRef();
+
+  const copy = () => {
+    try { navigator.clipboard.writeText(total.toFixed(2)); } catch(e){}
+    setCopied(true);
+    setToast(true);
+    setTimeout(()=>setToast(false),2200);
+    setTimeout(()=>setCopied(false),2200);
+  };
+
+  if(submitted) return (
+    <div className="fin" style={{textAlign:'center',padding:'32px 16px'}}>
+      <div style={{fontSize:52,marginBottom:12}}>✅</div>
+      <div style={{fontSize:20,fontWeight:500,marginBottom:6}}>¡Comprobante enviado!</div>
+      <div style={{fontSize:13,color:'var(--muted)',marginBottom:24}}>El restaurante verificará tu pago y comenzará a preparar tu pedido.</div>
+      <div className="card" style={{textAlign:'left'}}>
+        <div className="sec">Estado de tu pedido</div>
+        <div className="tl">
+          {[
+            {l:'Pedido recibido',ok:true},
+            {l:'Comprobante enviado',ok:true},
+            {l:'Verificando pago',ok:false,active:true},
+            {l:'En preparación',ok:false},
+            {l:'Listo ✓',ok:false},
+          ].map((s,i,a)=>(
+            <div key={i}>
+              <div className="ts">
+                <div className="tdot" style={{background:s.ok?'var(--brand)':s.active?'var(--warning)':'#ddd'}}></div>
+                <div style={{fontSize:14,color:s.ok||s.active?'#111':'var(--muted)'}}>{s.l}</div>
+              </div>
+              {i<a.length-1&&<div className="tline"></div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fin">
+      {toast&&<Toast msg="¡Monto copiado al portapapeles!"/>}
+      <div style={{textAlign:'center',marginBottom:12}}>
+        <div style={{fontSize:17,fontWeight:500}}>Paga con DeUna</div>
+        <div style={{fontSize:13,color:'var(--muted)'}}>{type==='mesa'?`Mesa ${table||'?'}`:'Para llevar'}</div>
+      </div>
+      <div className="dbox">
+        <div style={{fontSize:13,fontWeight:500,color:'var(--brand-dark)',marginBottom:2}}>Escanea el QR del restaurante en tu app DeUna</div>
+        <QR />
+        <div style={{fontSize:12,color:'var(--brand-dark)'}}>La Esquina Cuencana</div>
+        <div style={{fontSize:11,color:'var(--brand-dark)',marginTop:2,opacity:0.8}}>Sin comisión para el negocio</div>
+      </div>
+      <div style={{fontSize:13,color:'var(--muted)',textAlign:'center',marginBottom:4}}>Ingresa exactamente este monto en DeUna:</div>
+      <div className="amtcopy" onClick={copy} title="Toca para copiar el monto">
+        <div className="amt">${total.toFixed(2)}</div>
+        <i className="ti ti-copy" style={{color:copied?'var(--brand)':'var(--muted)',fontSize:18}} aria-hidden="true"></i>
+        <span style={{fontSize:12,color:copied?'var(--brand)':'var(--muted)'}}>{copied?'¡Copiado!':'Copiar'}</span>
+      </div>
+      <div className="card" style={{marginTop:16}}>
+        <div style={{fontWeight:500,marginBottom:6,fontSize:15}}>Sube tu comprobante de pago</div>
+        <div style={{fontSize:13,color:'var(--muted)',marginBottom:12}}>
+          Después de pagar en DeUna, sube el screenshot de confirmación. También puedes compartirlo desde DeUna usando <strong>Compartir → La Esquina Cuencana</strong>.
+        </div>
+        <div className={`upzone ${file?'has':''}`} onClick={()=>ref.current.click()}>
+          {!file
+            ? <><i className="ti ti-photo-up" style={{fontSize:30,color:'var(--muted)'}} aria-hidden="true"></i><div style={{marginTop:8,fontWeight:500}}>Subir comprobante</div><div style={{fontSize:12,color:'var(--muted)',marginTop:3}}>JPG, PNG — o compartir desde DeUna</div></>
+            : <><i className="ti ti-circle-check" style={{fontSize:30,color:'var(--brand)'}} aria-hidden="true"></i><div style={{marginTop:8,fontWeight:500,color:'var(--brand-dark)'}}>Comprobante listo</div><div style={{fontSize:12,color:'var(--brand-dark)',marginTop:2}}>{file.name}</div></>
+          }
+          <input ref={ref} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&setFile(e.target.files[0])}/>
+        </div>
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',marginTop:12,padding:'13px',fontSize:15}} onClick={()=>setSubmitted(true)} disabled={!file}>
+          <i className="ti ti-send"></i> Enviar comprobante al restaurante
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard() {
+  const [orders,setOrders] = useState(ORDERS_INIT);
+  const verify = id=>setOrders(o=>o.map(x=>x.id===id?{...x,status:'verified'}:x));
+  const reject = id=>setOrders(o=>o.map(x=>x.id===id?{...x,status:'fraud'}:x));
+
+  const verified = orders.filter(o=>o.status==='verified');
+  const toReview = orders.filter(o=>o.status==='review').length;
+  const frauds = orders.filter(o=>o.status==='fraud').length;
+  const todayTotal = verified.reduce((s,o)=>s+o.total,0);
+
+  const statusBadge = s=>{
+    if(s==='verified') return <span className="badge b-ok"><i className="ti ti-check" style={{fontSize:11}}></i> Verificado</span>;
+    if(s==='fraud') return <span className="badge b-err"><i className="ti ti-alert-triangle" style={{fontSize:11}}></i> Duplicado</span>;
+    if(s==='pending') return <span className="badge b-gray"><i className="ti ti-clock" style={{fontSize:11}}></i> Sin comprobante</span>;
+    if(s==='review') return <span className="badge b-warn"><i className="ti ti-eye" style={{fontSize:11}}></i> Por verificar</span>;
+  };
+
+  return (
+    <div className="fin">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
+        <div>
+          <div style={{fontSize:18,fontWeight:500}}>Panel del restaurante</div>
+          <div style={{fontSize:13,color:'var(--muted)'}}>La Esquina Cuencana · Hoy</div>
+        </div>
+        <button className="btn btn-sm"><i className="ti ti-bell"></i></button>
+      </div>
+      <div className="stat-grid">
+        <div className="stat">
+          <div className="slabel">Cobrado hoy</div>
+          <div className="sval" style={{color:'var(--brand-dark)',fontSize:18}}>${todayTotal.toFixed(2)}</div>
+        </div>
+        <div className="stat">
+          <div className="slabel">Por verificar</div>
+          <div className="sval" style={{color:toReview>0?'#854F0B':'#111'}}>{toReview}</div>
+        </div>
+        <div className="stat">
+          <div className="slabel">Alertas</div>
+          <div className="sval" style={{color:frauds>0?'var(--danger)':'#111'}}>{frauds}</div>
+        </div>
+      </div>
+      {frauds>0&&(
+        <div style={{background:'#FCEBEB',border:'1px solid #F7C1C1',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:13,color:'#A32D2D',display:'flex',gap:8,alignItems:'center'}}>
+          <i className="ti ti-alert-triangle" style={{fontSize:15}} aria-hidden="true"></i>
+          Se detectó {frauds} comprobante duplicado — revisa la orden en rojo.
+        </div>
+      )}
+      <div className="sec">Órdenes activas {toReview>0&&<span className="ndot"></span>}</div>
+      {orders.map(o=>(
+        <div key={o.id} className={`ocard ${o.status}`}>
+          <div className="och">
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              <span style={{fontWeight:600}}>{o.id}</span>
+              <span style={{fontSize:13,color:'var(--muted)'}}>{o.table}</span>
+            </div>
+            <div style={{display:'flex',gap:6,alignItems:'center'}}>
+              <span style={{fontSize:12,color:'var(--muted)'}}>{o.time}</span>
+              {statusBadge(o.status)}
+            </div>
+          </div>
+          <div className="oitems">{o.items.map(i=>`${i.q}× ${i.n}`).join(', ')}</div>
+          <div className="ofoot">
+            <span style={{fontWeight:600,color:'var(--brand-dark)'}}>${o.total.toFixed(2)}</span>
+            {o.txId&&<span style={{fontSize:11,color:'var(--muted)',background:'#f0efea',padding:'3px 8px',borderRadius:6,display:'flex',alignItems:'center',gap:4}}>
+              <i className="ti ti-receipt" style={{fontSize:12}} aria-hidden="true"></i>{o.txId}
+            </span>}
+          </div>
+          {o.status==='fraud'&&(
+            <div style={{fontSize:12,color:'var(--danger)',marginTop:8,background:'#FCEBEB',padding:'7px 10px',borderRadius:6,display:'flex',gap:6,alignItems:'center'}}>
+              <i className="ti ti-copy-off" style={{fontSize:13}} aria-hidden="true"></i>
+              Comprobante ya usado en orden {o.dupOf}. No enviar a cocina.
+            </div>
+          )}
+          {o.status==='review'&&(
+            <div className="oacts">
+              <button className="btn btn-primary btn-sm" onClick={()=>verify(o.id)}>
+                <i className="ti ti-check"></i> Verificar y a cocina
+              </button>
+              <button className="btn btn-sm" style={{color:'var(--danger)',borderColor:'#F7C1C1'}} onClick={()=>reject(o.id)}>
+                <i className="ti ti-x"></i> Rechazar
+              </button>
+            </div>
+          )}
+          {o.status==='verified'&&(
+            <div className="oacts">
+              <button className="btn btn-sm" style={{color:'var(--brand)',borderColor:'var(--brand)'}}>
+                <i className="ti ti-printer"></i> Imprimir comanda
+              </button>
+            </div>
+          )}
+          {o.status==='pending'&&(
+            <div style={{fontSize:12,color:'var(--muted)',marginTop:8,fontStyle:'italic'}}>
+              Esperando comprobante del cliente...
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [tab,setTab] = useState('menu');
+  const [step,setStep] = useState('menu');
+  const [cart,setCart] = useState([]);
+  const [payInfo,setPayInfo] = useState(null);
+
+  const handlePay = (type,table,total) => { setPayInfo({type,table,total}); setStep('pay'); };
+
+  return (
+    <div className="wrap">
+      <div className="tab-bar" role="tablist">
+        {[{id:'menu',label:'Menú',icon:'ti-tools-kitchen-2'},{id:'dash',label:'Restaurante',icon:'ti-layout-dashboard'}].map(t=>(
+          <button key={t.id} role="tab" aria-selected={tab===t.id} className={`tab ${tab===t.id?'active':''}`}
+            onClick={()=>{setTab(t.id);if(t.id==='menu')setStep('menu');}}>
+            <i className={`ti ${t.icon}`} aria-hidden="true"></i>{t.label}
+          </button>
+        ))}
+      </div>
+      <div className="screen">
+        {tab==='menu'&&step==='menu'&&<MenuScreen cart={cart} setCart={setCart} onCheckout={()=>setStep('order')}/>}
+        {tab==='menu'&&step==='order'&&<OrderScreen cart={cart} onPay={handlePay} onBack={()=>setStep('menu')}/>}
+        {tab==='menu'&&step==='pay'&&payInfo&&<PaymentScreen total={payInfo.total} type={payInfo.type} table={payInfo.table}/>}
+        {tab==='dash'&&<Dashboard/>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
