@@ -45,6 +45,17 @@ docker/kong.yml
 backups/
 __pycache__/
 
+# Claude / AI assistant files
+CLAUDE.md
+AGENTS.md
+
+# Internal development docs — not for public repo
+docs/internal/
+docs/ARCHITECTURE.md
+docs/PLAN.md
+docs/REQUIREMENTS.md
+docs/restaurant_app.html
+
 # vercel
 .vercel
 
