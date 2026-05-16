@@ -1,0 +1,3 @@
+ALTER TABLE restaurant
+  ADD COLUMN IF NOT EXISTS currency_symbol  TEXT         NOT NULL DEFAULT '$',
+  ADD COLUMN IF NOT EXISTS service_fee_fixed NUMERIC(10,2) NOT NULL DEFAULT 0;

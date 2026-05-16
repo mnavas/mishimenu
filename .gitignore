@@ -30,8 +30,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — real secrets never committed
+.env
+.env.local
+.env.*.local
+# example files ARE committed so users can copy them
+!.env.example
+!.env.local.example
+
+# generated during install — contains real JWT keys
+docker/kong.yml
+
+# runtime artifacts
+backups/
+__pycache__/
 
 # vercel
 .vercel
