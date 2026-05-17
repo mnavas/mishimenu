@@ -18,6 +18,7 @@ interface Props {
 export default function DashboardScreen({ restaurant, initialOrders, profile }: Props) {
   const isAdmin = !profile || profile.is_admin
   const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set())
   const supabase = createClient()
   const policy = restaurant.payment_policy
 
@@ -30,7 +31,10 @@ export default function DashboardScreen({ restaurant, initialOrders, profile }: 
         table: 'orders',
       }, payload => {
         if (payload.eventType === 'INSERT') {
-          setOrders(prev => [payload.new as Order, ...prev])
+          const incoming = payload.new as Order
+          setOrders(prev => [incoming, ...prev])
+          setNewOrderIds(prev => new Set(prev).add(incoming.id))
+          setTimeout(() => setNewOrderIds(prev => { const n = new Set(prev); n.delete(incoming.id); return n }), 2000)
         } else if (payload.eventType === 'UPDATE') {
           setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...(payload.new as Order) } : o))
         }
@@ -100,6 +104,7 @@ export default function DashboardScreen({ restaurant, initialOrders, profile }: 
       order={order}
       policy={policy}
       currencySymbol={restaurant.currency_symbol ?? '$'}
+      isNew={newOrderIds.has(order.id)}
       onVerify={handleVerify}
       onReject={handleReject}
     />

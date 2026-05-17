@@ -11,6 +11,7 @@ interface Props {
   order: Order
   policy: PaymentPolicy
   currencySymbol: string
+  isNew?: boolean
   onVerify: (id: string, overrideReason?: string) => void
   onReject: (id: string) => void
 }
@@ -32,13 +33,14 @@ const borderColors: Record<string, string> = {
   fraud:            'border-l-red-600',
 }
 
-export default function OrderCard({ order, policy, currencySymbol, onVerify, onReject }: Props) {
+export default function OrderCard({ order, policy, currencySymbol, isNew, onVerify, onReject }: Props) {
   const sym = currencySymbol || '$'
   const receipt = order.receipt as Receipt | undefined
   const isDuplicate = receipt?.is_duplicate
   const borderClass = isDuplicate ? borderColors.fraud : (borderColors[order.status] ?? 'border-l-zinc-300')
   const [overrideInput, setOverrideInput] = useState('')
   const [showOverride, setShowOverride] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Cash and card are both in-person: no receipt, staff verifies after collecting payment
@@ -61,10 +63,13 @@ export default function OrderCard({ order, policy, currencySymbol, onVerify, onR
     if (isDuplicate && !overrideInput.trim()) {
       showToast({ text: 'Escribe el motivo para sobrepasar la alerta', type: 'error' }); return
     }
+    // Require inline confirmation for digital payments to prevent misclicks
+    if (!isInPersonPayment && !isDuplicate && !showConfirm) { setShowConfirm(true); return }
     setLoading(true)
     onVerify(order.id, isDuplicate ? overrideInput : undefined)
     setLoading(false)
     setShowOverride(false)
+    setShowConfirm(false)
   }
 
   async function handleReject() {
@@ -79,7 +84,9 @@ export default function OrderCard({ order, policy, currencySymbol, onVerify, onR
   return (
     <div
       id={`order-${order.id}`}
-      className={`rounded-2xl bg-white shadow-sm ring-1 ring-zinc-100 border-l-4 overflow-hidden ${borderClass}`}
+      className={`rounded-2xl bg-white shadow-sm border-l-4 overflow-hidden transition-all duration-500 ${borderClass} ${
+        isNew ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-lg' : 'ring-1 ring-zinc-100'
+      }`}
     >
       <div className="p-4 space-y-3">
         {/* Header */}
@@ -123,14 +130,14 @@ export default function OrderCard({ order, policy, currencySymbol, onVerify, onR
 
         {/* OCR results (digital methods only) */}
         {receipt && receipt.ocr_status === 'done' && (
-          <div className="rounded-xl bg-zinc-50 p-3 space-y-1 text-xs">
+          <div className={`rounded-xl p-3 space-y-1 text-xs ${amountMatch === false ? 'bg-red-50 border border-red-200' : 'bg-zinc-50'}`}>
             {receipt.extracted_tx_id && (
               <p className="text-zinc-600">🔑 TX: <span className="font-mono font-medium">{receipt.extracted_tx_id}</span></p>
             )}
             {receipt.extracted_amount !== null && (
-              <p className={amountMatch ? 'text-emerald-700' : 'text-red-600'}>
-                💰 Monto comprobante: {sym}{Number(receipt.extracted_amount).toFixed(2)}
-                {amountMatch ? ' ✓' : ' ⚠️ No coincide'}
+              <p className={`font-semibold ${amountMatch ? 'text-emerald-700' : 'text-red-700 text-sm'}`}>
+                💰 Monto en comprobante: {sym}{Number(receipt.extracted_amount).toFixed(2)}
+                {amountMatch ? ' ✓' : ` ⚠️ No coincide (pedido: ${sym}${Number(order.total).toFixed(2)})`}
               </p>
             )}
             {receipt.extracted_sender && (
@@ -139,10 +146,10 @@ export default function OrderCard({ order, policy, currencySymbol, onVerify, onR
           </div>
         )}
         {receipt && receipt.ocr_status === 'processing' && (
-          <p className="text-xs text-amber-600 animate-pulse">Procesando comprobante…</p>
+          <p className="text-xs text-amber-600 animate-pulse">Leyendo comprobante…</p>
         )}
         {receipt && receipt.ocr_status === 'failed' && (
-          <p className="text-xs text-red-500">OCR falló — verificar imagen manualmente</p>
+          <p className="text-xs text-orange-600">No se pudo leer el comprobante automáticamente — verifica el monto a ojo y aprueba si corresponde</p>
         )}
 
         {/* Fraud duplicate info */}
@@ -166,8 +173,24 @@ export default function OrderCard({ order, policy, currencySymbol, onVerify, onR
           </div>
         )}
 
+        {/* Verify confirmation step for digital payments */}
+        {showConfirm && !isDuplicate && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 space-y-2">
+            <p className="text-xs font-semibold text-amber-800">¿Confirmar verificación?</p>
+            <p className="text-xs text-amber-700">Esta acción es irreversible y enviará el pedido a cocina.</p>
+            <div className="flex gap-2">
+              <Button onClick={handleVerify} loading={loading} size="sm" className="flex-1">
+                Sí, verificar
+              </Button>
+              <Button onClick={() => setShowConfirm(false)} size="sm" variant="secondary" className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
-        {canVerify && (
+        {canVerify && !showConfirm && (
           <div className="flex gap-2 pt-1">
             <Button
               onClick={handleVerify}

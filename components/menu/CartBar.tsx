@@ -14,7 +14,7 @@ export default function CartBar({ cart, restaurant, onOpen }: Props) {
   const { total }  = calcBreakdown(subtotal, restaurant)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-6">
+    <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-6" style={{ paddingBottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px)))' }}>
       <Button
         onClick={onOpen}
         size="lg"

@@ -7,12 +7,11 @@ const steps: { label: string; statuses: OrderStatus[] }[] = [
   { label: 'En preparación',        statuses: ['verified'] },
 ]
 
-function stepState(status: OrderStatus, stepStatuses: OrderStatus[]): 'done' | 'active' | 'pending' {
+function stepState(status: OrderStatus, stepIndex: number): 'done' | 'active' | 'pending' {
   if (status === 'rejected') return 'pending'
-  const idx = steps.findIndex(s => s.statuses.includes(status))
-  const stepIdx = steps.findIndex(s => s.statuses === stepStatuses)
-  if (idx > stepIdx) return 'done'
-  if (idx === stepIdx) return 'active'
+  const currentIdx = steps.findIndex(s => s.statuses.includes(status))
+  if (currentIdx > stepIndex) return 'done'
+  if (currentIdx === stepIndex) return 'active'
   return 'pending'
 }
 
@@ -25,14 +24,21 @@ export default function OrderStatusTimeline({ order }: { order: Order }) {
       <h3 className="font-semibold text-zinc-900 text-center">Estado de tu pedido</h3>
 
       {rejected ? (
-        <div className="rounded-xl bg-red-50 p-4 text-center text-red-700">
+        <div className="rounded-xl bg-red-50 p-4 text-center text-red-700 space-y-3">
+          <p className="text-2xl">❌</p>
           <p className="font-semibold">Pago rechazado</p>
-          <p className="text-sm mt-1">Contacta al restaurante para más información.</p>
+          <p className="text-sm">El restaurante no pudo confirmar tu pago. Acércate a la caja o intenta con otro método.</p>
+          <a
+            href="/"
+            className="mt-2 inline-block rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Volver al menú
+          </a>
         </div>
       ) : (
         <ol className="space-y-3">
           {steps.map((step, i) => {
-            const state = stepState(order.status, step.statuses)
+            const state = stepState(order.status, i)
             return (
               <li key={i} className="flex items-center gap-3">
                 <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
@@ -55,8 +61,9 @@ export default function OrderStatusTimeline({ order }: { order: Order }) {
       )}
 
       {verified && (
-        <div className="rounded-xl bg-emerald-50 p-3 text-center text-sm text-emerald-700 font-medium">
-          ✅ ¡Pago confirmado! Tu pedido está en camino.
+        <div className="rounded-xl bg-emerald-50 p-4 text-center space-y-1">
+          <p className="text-2xl">🎉</p>
+          <p className="text-sm text-emerald-700 font-semibold">¡Pago confirmado! Tu pedido está en preparación.</p>
         </div>
       )}
     </div>

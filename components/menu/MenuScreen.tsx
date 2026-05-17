@@ -61,26 +61,36 @@ export default function MenuScreen({ restaurant, categories, menuItems }: Props)
       </div>
 
       <div className="px-4 pt-4 space-y-6">
-        {itemsByCategory.map(({ category, items }) => (
-          <MenuCategory
-            key={category.id}
-            category={category}
-            items={items}
-            restaurant={restaurant}
-            getQty={getQty}
-            onAdd={addItem}
-            onRemove={removeItem}
-          />
-        ))}
-        {uncategorized.length > 0 && (
-          <MenuCategory
-            category={{ id: 'uncategorized', name: 'Otros', sort_order: 99 }}
-            items={uncategorized}
-            restaurant={restaurant}
-            getQty={getQty}
-            onAdd={addItem}
-            onRemove={removeItem}
-          />
+        {itemsByCategory.length === 0 && uncategorized.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
+            <span className="text-5xl">🍽️</span>
+            <p className="font-semibold text-zinc-700">La carta está siendo preparada</p>
+            <p className="text-sm text-zinc-400">En breve estará disponible. Pide al personal si necesitas ayuda.</p>
+          </div>
+        ) : (
+          <>
+            {itemsByCategory.map(({ category, items }) => (
+              <MenuCategory
+                key={category.id}
+                category={category}
+                items={items}
+                restaurant={restaurant}
+                getQty={getQty}
+                onAdd={addItem}
+                onRemove={removeItem}
+              />
+            ))}
+            {uncategorized.length > 0 && (
+              <MenuCategory
+                category={{ id: 'uncategorized', name: 'Otros', sort_order: 99 }}
+                items={uncategorized}
+                restaurant={restaurant}
+                getQty={getQty}
+                onAdd={addItem}
+                onRemove={removeItem}
+              />
+            )}
+          </>
         )}
       </div>
 

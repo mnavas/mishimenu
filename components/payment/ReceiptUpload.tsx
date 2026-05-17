@@ -42,6 +42,7 @@ export default function ReceiptUpload({ orderId, onSubmitted }: Props) {
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | Blob | null>(null)
   const [loading, setLoading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [loadingShared, setLoadingShared] = useState(isShared)
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export default function ReceiptUpload({ orderId, onSubmitted }: Props) {
   async function handleSubmit() {
     if (!file) return
     setLoading(true)
+    setUploadError('')
     try {
       const compressed = file instanceof File ? await compressImage(file) : file
       const fd = new FormData()
@@ -90,11 +92,11 @@ export default function ReceiptUpload({ orderId, onSubmitted }: Props) {
       if (!res.ok) throw new Error(data.error ?? 'Error al enviar comprobante')
 
       if (data.isDuplicate) {
-        showToast({ text: '⚠️ Comprobante duplicado (orden anterior)', type: 'error' })
+        showToast({ text: '⚠️ Este comprobante ya fue usado en otra orden', type: 'error' })
       }
       onSubmitted()
     } catch (e) {
-      showToast({ text: (e as Error).message, type: 'error' })
+      setUploadError((e as Error).message)
     } finally {
       setLoading(false)
     }
@@ -111,7 +113,7 @@ export default function ReceiptUpload({ orderId, onSubmitted }: Props) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-100 space-y-4">
       <p className="text-sm font-medium text-zinc-700">
-        {isShared ? '¿Enviar este comprobante?' : 'Sube tu comprobante de pago'}
+        {isShared ? 'Comprobante recibido por compartir — revísalo y confirma el envío' : 'Sube tu comprobante de pago'}
       </p>
 
       {preview ? (
@@ -145,9 +147,21 @@ export default function ReceiptUpload({ orderId, onSubmitted }: Props) {
         </button>
       )}
 
-      {file && (
+      {uploadError && (
+        <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 space-y-2">
+          <p className="text-sm text-red-700">{uploadError}</p>
+          <button
+            onClick={() => { setPreview(null); setFile(null); setUploadError('') }}
+            className="text-xs font-medium text-red-600 underline hover:text-red-800"
+          >
+            Elegir otro comprobante
+          </button>
+        </div>
+      )}
+
+      {file && !uploadError && (
         <Button onClick={handleSubmit} loading={loading} className="w-full">
-          {isShared ? 'Sí, enviar comprobante' : 'Enviar comprobante'}
+          {isShared ? 'Confirmar y enviar comprobante' : 'Enviar comprobante'}
         </Button>
       )}
     </div>

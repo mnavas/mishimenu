@@ -35,6 +35,7 @@ interface Props {
 export default function OrderSummary({ restaurant, cart, onClose, onOrderCreated }: Props) {
   const [orderType, setOrderType] = useState<OrderType>('mesa')
   const [tableNumber, setTableNumber] = useState('')
+  const [tableError, setTableError] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
     restaurant.accepted_payment_methods[0] ?? 'cash'
   )
@@ -46,9 +47,11 @@ export default function OrderSummary({ restaurant, cart, onClose, onOrderCreated
 
   async function handleSubmit() {
     if (orderType === 'mesa' && !tableNumber.trim()) {
+      setTableError(true)
       showToast({ text: 'Ingresa el número de mesa', type: 'error' })
       return
     }
+    setTableError(false)
     setLoading(true)
     try {
       const res = await fetch('/api/orders', {
@@ -73,9 +76,7 @@ export default function OrderSummary({ restaurant, cart, onClose, onOrderCreated
 
   const sym = restaurant.currency_symbol ?? '$'
   const isInPersonPayment = paymentMethod === 'cash' || paymentMethod === 'card'
-  const submitLabel = isInPersonPayment
-    ? `Confirmar — ${paymentMethod === 'card' ? 'Pagar con tarjeta' : 'Pagar en caja'} ${sym}${total.toFixed(2)}`
-    : `Confirmar — ${sym}${total.toFixed(2)}`
+  const submitLabel = `Confirmar pedido — ${sym}${total.toFixed(2)}`
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-white">
@@ -125,19 +126,22 @@ export default function OrderSummary({ restaurant, cart, onClose, onOrderCreated
         {/* Order type */}
         <OrderTypeSelector
           value={orderType}
-          onChange={setOrderType}
+          onChange={v => { setOrderType(v); setTableError(false) }}
           tableNumber={tableNumber}
-          onTableChange={setTableNumber}
+          onTableChange={v => { setTableNumber(v); if (v.trim()) setTableError(false) }}
+          tableError={tableError}
         />
 
         {/* Payment method */}
         {methods.length > 1 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-zinc-700">Método de pago</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div role="radiogroup" aria-label="Método de pago" className="grid grid-cols-2 gap-2">
               {methods.map(m => (
                 <button
                   key={m}
+                  role="radio"
+                  aria-checked={paymentMethod === m}
                   onClick={() => setPaymentMethod(m)}
                   className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm transition-colors ${
                     paymentMethod === m
@@ -157,7 +161,7 @@ export default function OrderSummary({ restaurant, cart, onClose, onOrderCreated
         )}
       </div>
 
-      <div className="px-4 pb-8 pt-3 border-t border-zinc-100">
+      <div className="px-4 pt-3 border-t border-zinc-100" style={{ paddingBottom: 'max(2rem, calc(1rem + env(safe-area-inset-bottom, 0px)))' }}>
         <Button
           onClick={handleSubmit}
           loading={loading}

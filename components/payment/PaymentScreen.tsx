@@ -68,14 +68,14 @@ export default function PaymentScreen({ restaurant, order: initialOrder }: Props
   if (expired) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-        <span className="text-4xl">⏰</span>
-        <h1 className="text-xl font-bold text-zinc-900">Pedido expirado</h1>
-        <p className="text-zinc-500">No se recibió el comprobante a tiempo.</p>
+        <span className="text-5xl">⏰</span>
+        <h1 className="text-xl font-bold text-zinc-900">El tiempo se agotó</h1>
+        <p className="text-zinc-500 max-w-xs">No recibimos tu comprobante de pago antes de que expirara el pedido. Vuelve al menú para hacer un nuevo pedido.</p>
         <a
           href="/"
           className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-medium text-white hover:bg-emerald-700"
         >
-          Volver al menú
+          Volver al menú y pedir de nuevo
         </a>
       </div>
     )
